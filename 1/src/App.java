@@ -31,10 +31,12 @@ class User implements Serializable{
 			//TODO: login
 		}else if(tries>2)lock=LocalDateTime.now();
 	}
+	@SuppressWarnings("unchecked")
 	public static void save(){
 		try{
 			FileInputStream fIS=new FileInputStream("C:/Users/user/AppData/Local/"/*TODO: write a name*/);
 			ObjectInputStream oIS=new ObjectInputStream(fIS);
+			User.userMap=(HashMap<String,User>)oIS.readObject();
 			fIS.close();oIS.close();
 		}catch(Exception ex){ex.printStackTrace();}
 	}
