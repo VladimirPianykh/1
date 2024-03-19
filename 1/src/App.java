@@ -1,7 +1,10 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -29,21 +32,43 @@ class User implements Serializable{
 		}
 		if(pwd==password){
 			//TODO: login
-		}else if(tries>2)lock=LocalDateTime.now();
+		}else if(tries>2)lock=LocalDateTime.now();else ++tries;
 	}
 	@SuppressWarnings("unchecked")
+	public static void load(){
+		String[]s={"Users","Editables"};
+		Object[]o=new Object[2];
+		for(int i=0;i<s.length;++i)try{
+			FileInputStream fIS=new FileInputStream("C:/Users/user/AppData/Local/Solution/"+s[i]);
+			ObjectInputStream oIS=new ObjectInputStream(fIS);
+			o[i]=oIS.readObject();
+			oIS.close();
+		}catch(Exception ex){ex.printStackTrace();}
+		User.userMap=o[0]==null?new HashMap<String,User>():(HashMap<String,User>)o[0];
+		Editable.editableMap=o[0]==null?new HashMap<String,Editable>():(HashMap<String,Editable>)o[0];
+	}
 	public static void save(){
 		try{
-			FileInputStream fIS=new FileInputStream("C:/Users/user/AppData/Local/"/*TODO: write a name*/);
-			ObjectInputStream oIS=new ObjectInputStream(fIS);
-			User.userMap=(HashMap<String,User>)oIS.readObject();
-			fIS.close();oIS.close();
-		}catch(Exception ex){ex.printStackTrace();}
+			String[]s={"Users","Editables"};
+			Object[]o={User.userMap,Editable.editableMap};
+			for(int i=0;i<s.length;++i){
+				FileOutputStream fOS=new FileOutputStream("C:/Users/user/AppData/Local/Solution/"+s[i]);
+				ObjectOutputStream oOS=new ObjectOutputStream(fOS);
+				oOS.writeObject(o[i]);
+				oOS.close();
+			}
+		}catch(IOException ex){User.userMap=new HashMap<String,User>();}
+		catch(Exception ex){ex.printStackTrace();}
 	}
 }
 
+class Editable{
+	//TODO: remove if necessary
+	public static HashMap<String,Editable>editableMap=new HashMap<String,Editable>();
+}
+
 class Main{
-	public static void main(String[]args) throws Exception{
+	public static void main(String[]args)throws Exception{
 		Dimension d=GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds().getSize();
 		JFrame f=new JFrame();
 		f.setSize(d);
